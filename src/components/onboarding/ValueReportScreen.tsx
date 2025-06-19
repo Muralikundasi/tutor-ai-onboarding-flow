@@ -3,6 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, Lightbulb, Brain, TrendingUp } from 'lucide-react';
 import { OnboardingData } from '../OnboardingFlow';
+import { getSubjectCategory } from '../../data/subjectDatabase';
 
 interface ValueReportScreenProps {
   data: OnboardingData;
@@ -10,40 +11,65 @@ interface ValueReportScreenProps {
 }
 
 const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) => {
-  // Calculate a mock proficiency score based on answers
-  const totalQuestions = data.answers.length;
+  // Calculate proficiency score based on answers
   const correctAnswers = data.answers.filter((answer, index) => {
-    // Mock correct answers (in real app, would compare with actual correct answers)
-    return answer === 0 || answer === 1; // Simplified logic
+    // Simple mock scoring - in real app would compare with actual correct answers
+    return answer === 0 || answer === 1;
   }).length;
   
-  const proficiencyScore = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 75;
+  const proficiencyScore = data.answers.length > 0 
+    ? Math.round((correctAnswers / data.answers.length) * 100) 
+    : 68;
 
-  const strengths = [
-    'Basic Equations',
-    'Problem Solving Fundamentals',
-    'Mathematical Reasoning'
-  ];
+  // Get subject-specific insights
+  const getSubjectInsights = () => {
+    const category = getSubjectCategory(data.subject);
+    
+    const insights = {
+      math: {
+        strengths: ['Basic equation solving', 'Number operations', 'Mathematical reasoning'],
+        growth: ['Advanced problem solving', 'Word problems', 'Complex calculations']
+      },
+      science: {
+        strengths: ['Scientific concepts', 'Observation skills', 'Basic principles'],
+        growth: ['Lab techniques', 'Scientific method', 'Data analysis']
+      },
+      elementary: {
+        strengths: ['Foundation skills', 'Basic concepts', 'Learning fundamentals'],
+        growth: ['Reading comprehension', 'Critical thinking', 'Advanced concepts']
+      },
+      business: {
+        strengths: ['Business fundamentals', 'Basic principles', 'Conceptual understanding'],
+        growth: ['Advanced applications', 'Real-world scenarios', 'Strategic thinking']
+      },
+      technology: {
+        strengths: ['Technical concepts', 'Problem solving', 'Logical thinking'],
+        growth: ['Programming skills', 'Advanced techniques', 'Project development']
+      },
+      default: {
+        strengths: ['Core fundamentals', 'Basic understanding', 'Learning foundation'],
+        growth: ['Advanced concepts', 'Critical analysis', 'Practical application']
+      }
+    };
 
-  const growthAreas = [
-    'Advanced Algebraic Concepts',
-    'Word Problem Strategies',
-    'Complex Equation Solving'
-  ];
+    return insights[category as keyof typeof insights] || insights.default;
+  };
+
+  const { strengths, growth } = getSubjectInsights();
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="max-w-4xl mx-auto p-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="text-center mb-12"
       >
-        <h1 className="text-4xl font-bold text-slate-800 mb-4">
+        <h1 className="text-4xl font-bold text-gray-800 mb-4">
           Here's what we learned
         </h1>
-        <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-          Based on your responses, we've created a personalized assessment of your current skills and learning opportunities.
+        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          Based on your {data.subject} assessment, we've created a personalized analysis of your current skills and learning opportunities.
         </p>
       </motion.div>
 
@@ -53,9 +79,9 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl shadow-xl p-8"
+          className="bg-white rounded-2xl shadow-lg p-8"
         >
-          <h3 className="text-2xl font-bold text-slate-800 mb-6 text-center">
+          <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">
             Your {data.subject} Proficiency
           </h3>
           
@@ -65,7 +91,7 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
                 cx="50"
                 cy="50"
                 r="40"
-                stroke="#e2e8f0"
+                stroke="#e5e7eb"
                 strokeWidth="8"
                 fill="none"
               />
@@ -73,7 +99,7 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
                 cx="50"
                 cy="50"
                 r="40"
-                stroke="url(#gradient)"
+                stroke="#3b82f6"
                 strokeWidth="8"
                 fill="none"
                 strokeLinecap="round"
@@ -82,17 +108,11 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
                 animate={{ strokeDashoffset: 2 * Math.PI * 40 * (1 - proficiencyScore / 100) }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
               />
-              <defs>
-                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#3b82f6" />
-                  <stop offset="100%" stopColor="#1d4ed8" />
-                </linearGradient>
-              </defs>
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <div className="text-3xl font-bold text-slate-800">{proficiencyScore}%</div>
-                <div className="text-sm text-slate-600">Current Level</div>
+                <div className="text-3xl font-bold text-gray-800">{proficiencyScore}%</div>
+                <div className="text-sm text-gray-600">Current Level</div>
               </div>
             </div>
           </div>
@@ -105,56 +125,36 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
           </div>
         </motion.div>
 
-        {/* AI Insights Module */}
+        {/* AI Preview Section */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-xl p-8 border border-blue-100"
+          className="bg-gradient-to-br from-purple-600 to-blue-600 text-white rounded-2xl shadow-lg p-8"
         >
-          <div className="flex items-center mb-4">
-            <Brain className="w-6 h-6 text-blue-600 mr-2" />
-            <span className="text-sm font-medium text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
-              Powered by AI
-            </span>
+          <div className="bg-white bg-opacity-20 rounded-full px-3 py-1 text-sm font-semibold mb-4 inline-block">
+            🚀 Powered by AI
           </div>
           
-          <h3 className="text-xl font-bold text-slate-800 mb-4">
-            AI Session Summary
-          </h3>
+          <h3 className="text-xl font-semibold mb-4">AI Session Summary Preview</h3>
+          <p className="mb-4 text-blue-100">What you'll get after each tutoring session:</p>
           
-          <div className="space-y-4">
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <div className="flex items-start">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3"></div>
-                <div>
-                  <p className="text-sm text-slate-700">
-                    <strong>Learning Style:</strong> Visual and step-by-step approach works best
-                  </p>
-                </div>
-              </div>
+          <div className="bg-white bg-opacity-10 rounded-lg p-4 space-y-2">
+            <div className="flex items-start text-sm">
+              <div className="w-2 h-2 bg-white rounded-full mt-2 mr-3 flex-shrink-0"></div>
+              <span>Automatic transcripts and key moment bookmarks</span>
             </div>
-            
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <div className="flex items-start">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3"></div>
-                <div>
-                  <p className="text-sm text-slate-700">
-                    <strong>Optimal Session Length:</strong> 45-60 minutes for maximum retention
-                  </p>
-                </div>
-              </div>
+            <div className="flex items-start text-sm">
+              <div className="w-2 h-2 bg-white rounded-full mt-2 mr-3 flex-shrink-0"></div>
+              <span>AI-generated progress summaries</span>
             </div>
-            
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <div className="flex items-start">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3"></div>
-                <div>
-                  <p className="text-sm text-slate-700">
-                    <strong>Focus Areas:</strong> Practice problems and real-world applications
-                  </p>
-                </div>
-              </div>
+            <div className="flex items-start text-sm">
+              <div className="w-2 h-2 bg-white rounded-full mt-2 mr-3 flex-shrink-0"></div>
+              <span>Personalized practice recommendations</span>
+            </div>
+            <div className="flex items-start text-sm">
+              <div className="w-2 h-2 bg-white rounded-full mt-2 mr-3 flex-shrink-0"></div>
+              <span>Real-time learning analytics</span>
             </div>
           </div>
         </motion.div>
@@ -166,11 +166,11 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="bg-white rounded-2xl shadow-xl p-8"
+          className="bg-white rounded-2xl shadow-lg p-8"
         >
           <div className="flex items-center mb-6">
             <CheckCircle className="w-6 h-6 text-green-500 mr-3" />
-            <h3 className="text-xl font-bold text-slate-800">Your Strengths</h3>
+            <h3 className="text-xl font-bold text-gray-800">Your Strengths</h3>
           </div>
           
           <div className="space-y-4">
@@ -183,7 +183,7 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
                 className="flex items-center p-4 bg-green-50 rounded-lg"
               >
                 <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                <span className="text-slate-700 font-medium">{strength}</span>
+                <span className="text-gray-700 font-medium">{strength}</span>
               </motion.div>
             ))}
           </div>
@@ -193,15 +193,15 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="bg-white rounded-2xl shadow-xl p-8"
+          className="bg-white rounded-2xl shadow-lg p-8"
         >
           <div className="flex items-center mb-6">
             <Lightbulb className="w-6 h-6 text-amber-500 mr-3" />
-            <h3 className="text-xl font-bold text-slate-800">Areas for Growth</h3>
+            <h3 className="text-xl font-bold text-gray-800">Areas for Growth</h3>
           </div>
           
           <div className="space-y-4">
-            {growthAreas.map((area, index) => (
+            {growth.map((area, index) => (
               <motion.div
                 key={area}
                 initial={{ opacity: 0, x: -10 }}
@@ -210,7 +210,7 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
                 className="flex items-center p-4 bg-amber-50 rounded-lg"
               >
                 <Lightbulb className="w-5 h-5 text-amber-500 mr-3 flex-shrink-0" />
-                <span className="text-slate-700 font-medium">{area}</span>
+                <span className="text-gray-700 font-medium">{area}</span>
               </motion.div>
             ))}
           </div>
@@ -228,12 +228,12 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={onNext}
-          className="bg-gradient-to-r from-coral-500 to-coral-600 hover:from-coral-600 hover:to-coral-700 text-white font-semibold text-lg px-12 py-4 rounded-xl shadow-lg transition-all"
+          className="bg-gradient-to-r from-pink-500 to-orange-500 hover:shadow-lg text-white font-semibold text-lg px-12 py-4 rounded-xl transition-all"
         >
-          See Tutors & Plans
+          Build My Personalized Plan
         </motion.button>
-        <p className="text-slate-600 mt-4">
-          Find the perfect tutor match based on your assessment results
+        <p className="text-gray-600 mt-4">
+          Get matched with expert tutors based on your assessment results
         </p>
       </motion.div>
     </div>

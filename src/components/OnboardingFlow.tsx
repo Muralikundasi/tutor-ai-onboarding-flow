@@ -3,13 +3,15 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DiagnosticScreen from './onboarding/DiagnosticScreen';
 import ValueReportScreen from './onboarding/ValueReportScreen';
-import PlansScreen from './onboarding/PlansScreen';
+import ConsultationScreen from './onboarding/ConsultationScreen';
 
 export type OnboardingData = {
   subject: string;
   gradeLevel: string;
   answers: number[];
   email?: string;
+  studentName?: string;
+  phoneNumber?: string;
 };
 
 const OnboardingFlow = () => {
@@ -41,15 +43,17 @@ const OnboardingFlow = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
-      {/* Progress Bar */}
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-sm text-slate-600">Step {currentStep} of 3</div>
-            <div className="text-sm text-slate-600">{Math.round((currentStep / 3) * 100)}% Complete</div>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold text-blue-600">Varsity Tutors</h1>
+            <div className="text-sm text-gray-600">Step {currentStep} of 3</div>
           </div>
-          <div className="w-full bg-slate-200 rounded-full h-2">
+          
+          {/* Progress Bar */}
+          <div className="w-full bg-gray-200 rounded-full h-2">
             <motion.div 
               className="bg-gradient-to-r from-blue-600 to-blue-700 h-2 rounded-full"
               initial={{ width: "33%" }}
@@ -84,7 +88,7 @@ const OnboardingFlow = () => {
             />
           )}
           {currentStep === 3 && (
-            <PlansScreen 
+            <ConsultationScreen 
               data={onboardingData} 
               updateData={updateData} 
             />
