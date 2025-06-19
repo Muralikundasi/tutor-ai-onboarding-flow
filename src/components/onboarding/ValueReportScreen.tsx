@@ -3,7 +3,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, Lightbulb, Brain, TrendingUp } from 'lucide-react';
 import { OnboardingData } from '../OnboardingFlow';
-import { getSubjectCategory } from '../../data/subjectDatabase';
 
 interface ValueReportScreenProps {
   data: OnboardingData;
@@ -13,7 +12,6 @@ interface ValueReportScreenProps {
 const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) => {
   // Calculate proficiency score based on answers
   const correctAnswers = data.answers.filter((answer, index) => {
-    // Simple mock scoring - in real app would compare with actual correct answers
     return answer === 0 || answer === 1;
   }).length;
   
@@ -21,41 +19,75 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
     ? Math.round((correctAnswers / data.answers.length) * 100) 
     : 68;
 
-  // Get subject-specific insights
-  const getSubjectInsights = () => {
-    const category = getSubjectCategory(data.subject);
-    
+  const getGoalDisplayName = (goal: string) => {
+    const names: Record<string, string> = {
+      'academics': 'Academic Support',
+      'test-prep': 'Test Preparation', 
+      'enrichment': 'Enrichment Learning'
+    };
+    return names[goal] || goal;
+  };
+
+  const getRoleText = (role: 'child' | 'myself') => {
+    return role === 'child' ? "your child's" : "your";
+  };
+
+  // Get goal-specific insights
+  const getGoalInsights = () => {
     const insights = {
-      math: {
-        strengths: ['Basic equation solving', 'Number operations', 'Mathematical reasoning'],
-        growth: ['Advanced problem solving', 'Word problems', 'Complex calculations']
+      'academics': {
+        strengths: ['Core concept understanding', 'Problem-solving approach', 'Learning foundation'],
+        growth: ['Advanced applications', 'Critical thinking', 'Study strategies']
       },
-      science: {
-        strengths: ['Scientific concepts', 'Observation skills', 'Basic principles'],
-        growth: ['Lab techniques', 'Scientific method', 'Data analysis']
+      'test-prep': {
+        strengths: ['Test-taking strategies', 'Time management', 'Content knowledge'],
+        growth: ['Advanced practice', 'Score optimization', 'Test confidence']
       },
-      elementary: {
-        strengths: ['Foundation skills', 'Basic concepts', 'Learning fundamentals'],
-        growth: ['Reading comprehension', 'Critical thinking', 'Advanced concepts']
-      },
-      business: {
-        strengths: ['Business fundamentals', 'Basic principles', 'Conceptual understanding'],
-        growth: ['Advanced applications', 'Real-world scenarios', 'Strategic thinking']
-      },
-      technology: {
-        strengths: ['Technical concepts', 'Problem solving', 'Logical thinking'],
-        growth: ['Programming skills', 'Advanced techniques', 'Project development']
-      },
-      default: {
-        strengths: ['Core fundamentals', 'Basic understanding', 'Learning foundation'],
-        growth: ['Advanced concepts', 'Critical analysis', 'Practical application']
+      'enrichment': {
+        strengths: ['Creative thinking', 'Advanced concepts', 'Independent learning'],
+        growth: ['Project-based learning', 'Research skills', 'Leadership development']
       }
     };
 
-    return insights[category as keyof typeof insights] || insights.default;
+    return insights[data.goal as keyof typeof insights] || insights.academics;
   };
 
-  const { strengths, growth } = getSubjectInsights();
+  const getAIFeatures = () => {
+    const features = {
+      'academics': {
+        title: 'AI Learning Support',
+        items: [
+          'Automatic session transcripts and key moment bookmarks',
+          'AI-generated progress summaries and learning insights',
+          'Personalized homework help and practice recommendations',
+          'Real-time learning analytics and improvement tracking'
+        ]
+      },
+      'test-prep': {
+        title: 'AI Test Prep Features',
+        items: [
+          'AI-generated practice tests tailored to your level',
+          'Smart score analysis and improvement recommendations',
+          'Adaptive study schedules based on test dates',
+          'Real-time performance tracking and strategy adjustments'
+        ]
+      },
+      'enrichment': {
+        title: 'AI Enrichment Tools',
+        items: [
+          'Advanced learning pathway recommendations',
+          'Creative project ideas and skill challenges',
+          'Independent research guidance and resources',
+          'Real-time skill development tracking and certificates'
+        ]
+      }
+    };
+
+    return features[data.goal as keyof typeof features] || features.academics;
+  };
+
+  const { strengths, growth } = getGoalInsights();
+  const aiFeatures = getAIFeatures();
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -69,7 +101,7 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
           Here's what we learned
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Based on your {data.subject} assessment, we've created a personalized analysis of your current skills and learning opportunities.
+          Based on {getRoleText(data.role)} {data.subject} assessment, we've created a personalized analysis for {getGoalDisplayName(data.goal).toLowerCase()}.
         </p>
       </motion.div>
 
@@ -82,7 +114,7 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
           className="bg-white rounded-2xl shadow-lg p-8"
         >
           <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-            Your {data.subject} Proficiency
+            {data.role === 'child' ? 'Your Child\'s' : 'Your'} {data.subject} Proficiency
           </h3>
           
           <div className="relative w-48 h-48 mx-auto mb-6">
@@ -136,26 +168,16 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
             🚀 Powered by AI
           </div>
           
-          <h3 className="text-xl font-semibold mb-4">AI Session Summary Preview</h3>
-          <p className="mb-4 text-blue-100">What you'll get after each tutoring session:</p>
+          <h3 className="text-xl font-semibold mb-4">{aiFeatures.title}</h3>
+          <p className="mb-4 text-blue-100">What you'll get with our AI-enhanced tutoring:</p>
           
           <div className="bg-white bg-opacity-10 rounded-lg p-4 space-y-2">
-            <div className="flex items-start text-sm">
-              <div className="w-2 h-2 bg-white rounded-full mt-2 mr-3 flex-shrink-0"></div>
-              <span>Automatic transcripts and key moment bookmarks</span>
-            </div>
-            <div className="flex items-start text-sm">
-              <div className="w-2 h-2 bg-white rounded-full mt-2 mr-3 flex-shrink-0"></div>
-              <span>AI-generated progress summaries</span>
-            </div>
-            <div className="flex items-start text-sm">
-              <div className="w-2 h-2 bg-white rounded-full mt-2 mr-3 flex-shrink-0"></div>
-              <span>Personalized practice recommendations</span>
-            </div>
-            <div className="flex items-start text-sm">
-              <div className="w-2 h-2 bg-white rounded-full mt-2 mr-3 flex-shrink-0"></div>
-              <span>Real-time learning analytics</span>
-            </div>
+            {aiFeatures.items.map((item, index) => (
+              <div key={index} className="flex items-start text-sm">
+                <div className="w-2 h-2 bg-white rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                <span>{item}</span>
+              </div>
+            ))}
           </div>
         </motion.div>
       </div>
@@ -170,7 +192,9 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
         >
           <div className="flex items-center mb-6">
             <CheckCircle className="w-6 h-6 text-green-500 mr-3" />
-            <h3 className="text-xl font-bold text-gray-800">Your Strengths</h3>
+            <h3 className="text-xl font-bold text-gray-800">
+              {data.role === 'child' ? 'Your Child\'s Strengths' : 'Your Strengths'}
+            </h3>
           </div>
           
           <div className="space-y-4">
@@ -230,7 +254,7 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
           onClick={onNext}
           className="bg-gradient-to-r from-pink-500 to-orange-500 hover:shadow-lg text-white font-semibold text-lg px-12 py-4 rounded-xl transition-all"
         >
-          Build My Personalized Plan
+          Build {data.role === 'child' ? 'My Child\'s' : 'My'} Personalized Plan
         </motion.button>
         <p className="text-gray-600 mt-4">
           Get matched with expert tutors based on your assessment results

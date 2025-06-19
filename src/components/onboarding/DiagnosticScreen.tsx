@@ -1,9 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { ChevronDown } from 'lucide-react';
 import { OnboardingData } from '../OnboardingFlow';
-import SubjectAutocomplete from '../ui/SubjectAutocomplete';
-import { getAvailableGrades, getQuestions } from '../../data/subjectDatabase';
+import GoalSelector from '../ui/GoalSelector';
+import RoleToggle from '../ui/RoleToggle';
+import { getGoalSubjects, getSubjectGrades, getGoalQuestions } from '../../data/learningGoals';
 
 interface DiagnosticScreenProps {
   data: OnboardingData;
@@ -11,13 +13,8 @@ interface DiagnosticScreenProps {
   onNext: () => void;
 }
 
-const allGrades = [
-  'K', '1st Grade', '2nd Grade', '3rd Grade', '4th Grade', '5th Grade',
-  '6th Grade', '7th Grade', '8th Grade', '9th Grade', '10th Grade',
-  '11th Grade', '12th Grade', 'College'
-];
-
 const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, onNext }) => {
+  const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
   const [availableGrades, setAvailableGrades] = useState<string[]>([]);
   const [questions, setQuestions] = useState<any[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -25,31 +22,51 @@ const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, o
   const [showQuestions, setShowQuestions] = useState(false);
 
   useEffect(() => {
-    if (data.subject) {
-      const grades = getAvailableGrades(data.subject);
-      setAvailableGrades(grades);
+    if (data.goal) {
+      const subjects = getGoalSubjects(data.goal);
+      setAvailableSubjects(Object.keys(subjects));
+      // Reset subject and grade when goal changes
+      updateData({ subject: '', gradeLevel: '' });
       setShowQuestions(false);
-      setCurrentQuestion(0);
-      setSelectedAnswers([]);
     }
-  }, [data.subject]);
+  }, [data.goal]);
 
   useEffect(() => {
-    if (data.subject && data.gradeLevel) {
-      const questionSet = getQuestions(data.subject, data.gradeLevel);
+    if (data.goal && data.subject) {
+      const grades = getSubjectGrades(data.goal, data.subject);
+      setAvailableGrades(grades);
+      // Reset grade when subject changes
+      updateData({ gradeLevel: '' });
+      setShowQuestions(false);
+    }
+  }, [data.goal, data.subject]);
+
+  useEffect(() => {
+    if (data.goal && data.subject && data.gradeLevel) {
+      const questionSet = getGoalQuestions(data.goal, data.subject, data.gradeLevel);
       if (questionSet.length > 0) {
         setQuestions(questionSet);
         setShowQuestions(true);
+        setCurrentQuestion(0);
+        setSelectedAnswers([]);
       }
     }
-  }, [data.subject, data.gradeLevel]);
+  }, [data.goal, data.subject, data.gradeLevel]);
 
-  const handleSubjectChange = (subject: string) => {
-    updateData({ subject, gradeLevel: '' });
+  const handleGoalChange = (goal: string) => {
+    updateData({ goal });
   };
 
-  const handleGradeChange = (grade: string) => {
-    updateData({ gradeLevel: grade });
+  const handleRoleChange = (role: 'child' | 'myself') => {
+    updateData({ role });
+  };
+
+  const handleSubjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    updateData({ subject: e.target.value });
+  };
+
+  const handleGradeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    updateData({ gradeLevel: e.target.value });
   };
 
   const handleAnswerSelect = (answerIndex: number) => {
@@ -72,7 +89,16 @@ const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, o
   };
 
   const canShowResults = () => {
-    return data.subject && data.gradeLevel && selectedAnswers.length >= 2;
+    return data.goal && data.subject && data.gradeLevel && selectedAnswers.length >= 2;
+  };
+
+  const getGoalDisplayName = (goal: string) => {
+    const names: Record<string, string> = {
+      'academics': 'Academic Support',
+      'test-prep': 'Test Preparation',
+      'enrichment': 'Enrichment Learning'
+    };
+    return names[goal] || goal;
   };
 
   return (
@@ -84,54 +110,84 @@ const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, o
         className="text-center mb-12"
       >
         <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          Let's find your starting point
+          What's the learning goal today?
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          We'll ask a few quick questions to understand your current level and create a personalized learning plan just for you.
+          We'll personalize everything based on your learning goals and create a plan that works for you.
         </p>
       </motion.div>
 
-      <div className="bg-white rounded-2xl shadow-lg p-8 max-w-2xl mx-auto">
+      <div className="bg-white rounded-2xl shadow-lg p-8 max-w-3xl mx-auto">
         {!showQuestions ? (
           <div className="space-y-8">
-            {/* Subject Selection */}
+            {/* Goal Selection */}
             <div>
-              <label className="block text-lg font-semibold text-gray-700 mb-4">
-                What subject would you like help with? *
+              <label className="block text-lg font-semibold text-gray-700 mb-6 text-center">
+                Choose your learning goal
               </label>
-              <SubjectAutocomplete
-                value={data.subject}
-                onChange={handleSubjectChange}
-                placeholder="Search for a subject..."
-              />
+              <GoalSelector selectedGoal={data.goal} onChange={handleGoalChange} />
             </div>
 
-            {/* Grade Level Selection */}
-            {data.subject && (
+            {/* Role Toggle */}
+            {data.goal && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <label className="block text-lg font-semibold text-gray-700 mb-4">
-                  What grade level?
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {availableGrades.map((grade) => (
-                    <motion.button
-                      key={grade}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleGradeChange(grade)}
-                      className={`p-4 rounded-xl border-2 transition-all font-medium ${
-                        data.gradeLevel === grade
-                          ? 'border-blue-600 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                <RoleToggle selectedRole={data.role} onChange={handleRoleChange} />
+              </motion.div>
+            )}
+
+            {/* Subject and Grade Selection */}
+            {data.goal && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="grid md:grid-cols-2 gap-6"
+              >
+                <div>
+                  <label className="block text-lg font-semibold text-gray-700 mb-4">
+                    Select a subject
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={data.subject}
+                      onChange={handleSubjectChange}
+                      className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none appearance-none bg-white text-lg"
                     >
-                      {grade}
-                    </motion.button>
-                  ))}
+                      <option value="">Select a subject...</option>
+                      {availableSubjects.map((subject) => (
+                        <option key={subject} value={subject}>
+                          {subject}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-lg font-semibold text-gray-700 mb-4">
+                    Select grade level
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={data.gradeLevel}
+                      onChange={handleGradeChange}
+                      disabled={!data.subject}
+                      className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none appearance-none bg-white text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    >
+                      <option value="">Select grade level...</option>
+                      {availableGrades.map((grade) => (
+                        <option key={grade} value={grade}>
+                          {grade}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" />
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -142,35 +198,40 @@ const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, o
             animate={{ opacity: 1 }}
             className="space-y-6"
           >
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-gray-800">
-                Question {currentQuestion + 1} of {questions.length}
-              </h3>
-              <div className="text-sm text-gray-500">
-                {data.subject} • {data.gradeLevel}
+            <div className="bg-blue-50 rounded-xl p-6 border-2 border-blue-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold text-blue-800">
+                  Quick Assessment
+                </h3>
+                <div className="text-sm text-blue-600">
+                  Question {currentQuestion + 1} of {questions.length}
+                </div>
               </div>
-            </div>
+              <div className="text-sm text-blue-600 mb-4">
+                {getGoalDisplayName(data.goal)} • {data.subject} • {data.gradeLevel}
+              </div>
 
-            <div className="bg-gray-50 rounded-xl p-6 mb-6">
-              <h4 className="text-lg font-medium text-gray-800 mb-4">
-                {questions[currentQuestion]?.question}
-              </h4>
-              <div className="space-y-3">
-                {questions[currentQuestion]?.options.map((option: string, index: number) => (
-                  <motion.button
-                    key={index}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                    onClick={() => handleAnswerSelect(index)}
-                    className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
-                      selectedAnswers[currentQuestion] === index
-                        ? 'border-pink-500 bg-pink-50 text-pink-700'
-                        : 'border-gray-200 hover:border-gray-300 bg-white'
-                    }`}
-                  >
-                    {option}
-                  </motion.button>
-                ))}
+              <div className="bg-white rounded-lg p-6">
+                <h4 className="text-lg font-medium text-gray-800 mb-4">
+                  {questions[currentQuestion]?.question}
+                </h4>
+                <div className="space-y-3">
+                  {questions[currentQuestion]?.options.map((option: string, index: number) => (
+                    <motion.button
+                      key={index}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      onClick={() => handleAnswerSelect(index)}
+                      className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
+                        selectedAnswers[currentQuestion] === index
+                          ? 'border-pink-500 bg-pink-50 text-pink-700'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      {option}
+                    </motion.button>
+                  ))}
+                </div>
               </div>
             </div>
 

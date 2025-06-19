@@ -6,6 +6,8 @@ import ValueReportScreen from './onboarding/ValueReportScreen';
 import ConsultationScreen from './onboarding/ConsultationScreen';
 
 export type OnboardingData = {
+  goal: string;
+  role: 'child' | 'myself';
   subject: string;
   gradeLevel: string;
   answers: number[];
@@ -17,6 +19,8 @@ export type OnboardingData = {
 const OnboardingFlow = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
+    goal: '',
+    role: 'child',
     subject: '',
     gradeLevel: '',
     answers: [],

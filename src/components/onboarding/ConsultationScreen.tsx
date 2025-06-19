@@ -15,11 +15,45 @@ const ConsultationScreen: React.FC<ConsultationScreenProps> = ({ data, updateDat
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<{ studentName?: string; phoneNumber?: string }>({});
 
+  const getGoalDisplayName = (goal: string) => {
+    const names: Record<string, string> = {
+      'academics': 'Academic Support',
+      'test-prep': 'Test Preparation',
+      'enrichment': 'Enrichment Learning'
+    };
+    return names[goal] || goal;
+  };
+
+  const getGoalBenefits = () => {
+    const benefits = {
+      'academics': [
+        'Review diagnostic results and identify key learning gaps',
+        'Match with a subject-expert tutor who understands your needs',
+        'Create a personalized study plan that fits your schedule',
+        'See our AI-powered homework help tools in action'
+      ],
+      'test-prep': [
+        'Analyze diagnostic results and create a strategic timeline',
+        'Match with a test prep specialist with proven score improvements',
+        'Design a personalized score improvement plan with target goals',
+        'See our AI-powered practice test generation system'
+      ],
+      'enrichment': [
+        'Review assessment and identify advanced learning opportunities',
+        'Match with an expert tutor who specializes in enrichment learning',
+        'Design an advanced pathway for skill development and exploration',
+        'See our AI-powered project and challenge recommendation system'
+      ]
+    };
+
+    return benefits[data.goal as keyof typeof benefits] || benefits.academics;
+  };
+
   const validateForm = () => {
     const newErrors: { studentName?: string; phoneNumber?: string } = {};
     
     if (!studentName.trim()) {
-      newErrors.studentName = 'Student name is required';
+      newErrors.studentName = data.role === 'child' ? 'Student name is required' : 'Your name is required';
     }
     
     if (!phoneNumber.trim()) {
@@ -57,19 +91,21 @@ const ConsultationScreen: React.FC<ConsultationScreenProps> = ({ data, updateDat
             Your consultation is scheduled!
           </h2>
           <p className="text-lg text-gray-600 mb-8">
-            We've saved your personalized {data.subject} assessment for <strong>{studentName}</strong>. 
+            We've saved your personalized {getGoalDisplayName(data.goal).toLowerCase()} assessment for <strong>{studentName}</strong>. 
             A learning specialist will call <strong>{phoneNumber}</strong> within 24 hours to discuss your customized tutoring plan.
           </p>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-blue-800 text-sm">
-              <strong>What's Next:</strong> Our expert will review your diagnostic results, match you with the perfect tutor, 
-              and show you how our AI-powered platform can accelerate your learning journey.
+              <strong>What's Next:</strong> Our expert will review your diagnostic results, match you with the perfect tutor 
+              for {getGoalDisplayName(data.goal).toLowerCase()}, and show you how our AI-powered platform can accelerate your learning journey.
             </p>
           </div>
         </motion.div>
       </div>
     );
   }
+
+  const benefits = getGoalBenefits();
 
   return (
     <div className="max-w-2xl mx-auto p-6">
@@ -80,10 +116,10 @@ const ConsultationScreen: React.FC<ConsultationScreenProps> = ({ data, updateDat
         className="text-center mb-8"
       >
         <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          Let's build your personalized plan
+          Let's build {data.role === 'child' ? 'your child\'s' : 'your'} personalized plan
         </h1>
         <p className="text-xl text-gray-600">
-          Based on your {data.subject} assessment, we're ready to connect you with the perfect tutor and learning plan.
+          Based on {data.role === 'child' ? 'your child\'s' : 'your'} {data.subject} assessment, we're ready to connect you with the perfect {getGoalDisplayName(data.goal).toLowerCase()} plan.
         </p>
       </motion.div>
 
@@ -117,22 +153,12 @@ const ConsultationScreen: React.FC<ConsultationScreenProps> = ({ data, updateDat
       >
         <h3 className="text-lg font-semibold mb-4 text-center">Your free consultation will include:</h3>
         <ul className="space-y-3">
-          <li className="flex items-start">
-            <span className="text-green-500 font-bold mr-3 mt-1">✓</span>
-            <span>Review your student's diagnostic results in detail</span>
-          </li>
-          <li className="flex items-start">
-            <span className="text-green-500 font-bold mr-3 mt-1">✓</span>
-            <span>Match you with the perfect, expert-vetted tutor</span>
-          </li>
-          <li className="flex items-start">
-            <span className="text-green-500 font-bold mr-3 mt-1">✓</span>
-            <span>Design a custom learning plan that fits your family's goals</span>
-          </li>
-          <li className="flex items-start">
-            <span className="text-green-500 font-bold mr-3 mt-1">✓</span>
-            <span>See our Live + AI™ platform in action</span>
-          </li>
+          {benefits.map((benefit, index) => (
+            <li key={index} className="flex items-start">
+              <span className="text-green-500 font-bold mr-3 mt-1">✓</span>
+              <span>{benefit}</span>
+            </li>
+          ))}
         </ul>
       </motion.div>
 
@@ -146,7 +172,7 @@ const ConsultationScreen: React.FC<ConsultationScreenProps> = ({ data, updateDat
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700">
-              Student's Name *
+              {data.role === 'child' ? 'Student\'s Name' : 'Your Name'} *
             </label>
             <input 
               type="text" 
@@ -157,7 +183,7 @@ const ConsultationScreen: React.FC<ConsultationScreenProps> = ({ data, updateDat
                   ? 'border-red-300 focus:border-red-500' 
                   : 'border-gray-200 focus:border-blue-500'
               }`}
-              placeholder="Enter student's name"
+              placeholder={data.role === 'child' ? 'Enter student\'s name' : 'Enter your name'}
             />
             {errors.studentName && (
               <p className="mt-1 text-sm text-red-600">{errors.studentName}</p>
@@ -166,7 +192,7 @@ const ConsultationScreen: React.FC<ConsultationScreenProps> = ({ data, updateDat
           
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700">
-              Parent/Guardian Phone Number *
+              {data.role === 'child' ? 'Parent/Guardian Phone Number' : 'Phone Number'} *
             </label>
             <input 
               type="tel" 
