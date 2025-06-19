@@ -7,7 +7,7 @@ import ConsultationScreen from './onboarding/ConsultationScreen';
 
 export type OnboardingData = {
   goal: string;
-  role: 'child' | 'myself';
+  role: 'child' | 'Parent';
   subject: string;
   gradeLevel: string;
   answers: number[];

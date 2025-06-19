@@ -126,7 +126,7 @@ const ConsultationScreen: React.FC<ConsultationScreenProps> = ({ data, updateDat
             <span className="font-medium text-gray-600">Goal:</span> {getGoalDisplayName(data.goal)}
           </div>
           <div>
-            <span className="font-medium text-gray-600">Learner:</span> {data.role === 'child' ? 'My Child' : 'Myself'}
+            <span className="font-medium text-gray-600">Learner:</span> {data.role === 'child' ? 'My Child' : 'Parent'}
           </div>
           <div>
             <span className="font-medium text-gray-600">Subject:</span> {data.subject}

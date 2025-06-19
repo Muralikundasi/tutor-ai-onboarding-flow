@@ -28,7 +28,7 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
     return names[goal] || goal;
   };
 
-  const getRoleText = (role: 'child' | 'myself') => {
+  const getRoleText = (role: 'child' | 'Parent') => {
     return role === 'child' ? "your child's" : "your";
   };
 

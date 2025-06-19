@@ -3,8 +3,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 interface RoleToggleProps {
-  selectedRole: 'child' | 'myself';
-  onChange: (role: 'child' | 'myself') => void;
+  selectedRole: 'child' | 'Parent';
+  onChange: (role: 'child' | 'Parent') => void;
 }
 
 const RoleToggle: React.FC<RoleToggleProps> = ({ selectedRole, onChange }) => {
@@ -30,12 +30,12 @@ const RoleToggle: React.FC<RoleToggleProps> = ({ selectedRole, onChange }) => {
           My Child
         </button>
         <button
-          onClick={() => onChange('myself')}
+          onClick={() => onChange('Parent')}
           className={`relative z-10 px-6 py-2 text-sm font-medium rounded-full transition-colors ${
-            selectedRole === 'myself' ? 'text-white' : 'text-gray-700'
+            selectedRole === 'Parent' ? 'text-white' : 'text-gray-700'
           }`}
         >
-          Myself
+          Parent
         </button>
       </div>
     </div>

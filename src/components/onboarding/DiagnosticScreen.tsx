@@ -209,7 +209,7 @@ const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, o
     updateData({ goal });
   };
 
-  const handleRoleChange = (role: 'child' | 'myself') => {
+  const handleRoleChange = (role: 'child' | 'Parent') => {
     updateData({ role });
   };
 
