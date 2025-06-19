@@ -5,7 +5,7 @@ import { ChevronDown } from 'lucide-react';
 import { OnboardingData } from '../OnboardingFlow';
 import GoalSelector from '../ui/GoalSelector';
 import RoleToggle from '../ui/RoleToggle';
-import { getGoalSubjects, getSubjectGrades, getGoalQuestions } from '../../data/learningGoals';
+import SubjectAutocomplete from '../ui/SubjectAutocomplete';
 
 interface DiagnosticScreenProps {
   data: OnboardingData;
@@ -14,44 +14,196 @@ interface DiagnosticScreenProps {
 }
 
 const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, onNext }) => {
-  const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
-  const [availableGrades, setAvailableGrades] = useState<string[]>([]);
   const [questions, setQuestions] = useState<any[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
   const [showQuestions, setShowQuestions] = useState(false);
 
-  useEffect(() => {
-    if (data.goal) {
-      const subjects = getGoalSubjects(data.goal);
-      setAvailableSubjects(Object.keys(subjects));
-      // Reset subject and grade when goal changes
-      updateData({ subject: '', gradeLevel: '' });
-      setShowQuestions(false);
-    }
-  }, [data.goal]);
-
-  useEffect(() => {
-    if (data.goal && data.subject) {
-      const grades = getSubjectGrades(data.goal, data.subject);
-      setAvailableGrades(grades);
-      // Reset grade when subject changes
-      updateData({ gradeLevel: '' });
-      setShowQuestions(false);
-    }
-  }, [data.goal, data.subject]);
+  const allGrades = [
+    { id: 'K', label: 'K' },
+    { id: '1st Grade', label: '1st' },
+    { id: '2nd Grade', label: '2nd' },
+    { id: '3rd Grade', label: '3rd' },
+    { id: '4th Grade', label: '4th' },
+    { id: '5th Grade', label: '5th' },
+    { id: '6th Grade', label: '6th' },
+    { id: '7th Grade', label: '7th' },
+    { id: '8th Grade', label: '8th' },
+    { id: '9th Grade', label: '9th' },
+    { id: '10th Grade', label: '10th' },
+    { id: '11th Grade', label: '11th' },
+    { id: '12th Grade', label: '12th' },
+    { id: 'College', label: 'College' }
+  ];
 
   useEffect(() => {
     if (data.goal && data.subject && data.gradeLevel) {
-      const questionSet = getGoalQuestions(data.goal, data.subject, data.gradeLevel);
-      if (questionSet.length > 0) {
-        setQuestions(questionSet);
+      const generatedQuestions = generateUniversalQuestions(data.subject, data.gradeLevel, data.goal, data.role);
+      if (generatedQuestions.length > 0) {
+        setQuestions(generatedQuestions);
         setShowQuestions(true);
         setCurrentQuestion(0);
         setSelectedAnswers([]);
       }
     }
-  }, [data.goal, data.subject, data.gradeLevel]);
+  }, [data.goal, data.subject, data.gradeLevel, data.role]);
+
+  const generateUniversalQuestions = (subject: string, grade: string, goal: string, role: string) => {
+    // Universal question bank with intelligent selection
+    const questionBank = {
+      mathematics: {
+        elementary: [
+          {
+            question: "What is 7 + 5?",
+            options: ["10", "11", "12", "13"],
+            correct: 2
+          },
+          {
+            question: "Which shape has 3 sides?",
+            options: ["Circle", "Square", "Triangle", "Rectangle"],
+            correct: 2
+          }
+        ],
+        middle: [
+          {
+            question: "Solve for x: 2x + 4 = 12",
+            options: ["x = 2", "x = 4", "x = 6", "x = 8"],
+            correct: 1
+          },
+          {
+            question: "What is 25% of 80?",
+            options: ["15", "20", "25", "30"],
+            correct: 1
+          }
+        ],
+        high: [
+          {
+            question: "What is the slope of the line y = 3x + 2?",
+            options: ["2", "3", "3x", "5"],
+            correct: 1
+          },
+          {
+            question: "Factor: x² - 9",
+            options: ["(x - 3)(x - 3)", "(x + 3)(x - 3)", "x(x - 9)", "Cannot be factored"],
+            correct: 1
+          }
+        ],
+        college: [
+          {
+            question: "What is the derivative of x³?",
+            options: ["x²", "3x²", "3x³", "x³/3"],
+            correct: 1
+          }
+        ]
+      },
+      science: {
+        elementary: [
+          {
+            question: "What do plants need to grow?",
+            options: ["Only water", "Sunlight and water", "Only soil", "Only air"],
+            correct: 1
+          },
+          {
+            question: "How many legs does a spider have?",
+            options: ["6", "8", "10", "12"],
+            correct: 1
+          }
+        ],
+        middle: [
+          {
+            question: "What is the powerhouse of the cell?",
+            options: ["Nucleus", "Mitochondria", "Ribosome", "Cytoplasm"],
+            correct: 1
+          },
+          {
+            question: "What gas do plants absorb from the air?",
+            options: ["Oxygen", "Carbon dioxide", "Nitrogen", "Hydrogen"],
+            correct: 1
+          }
+        ],
+        high: [
+          {
+            question: "What type of bond forms between Na and Cl?",
+            options: ["Covalent", "Ionic", "Metallic", "Hydrogen"],
+            correct: 1
+          },
+          {
+            question: "What is the chemical formula for water?",
+            options: ["H2O", "CO2", "NaCl", "O2"],
+            correct: 0
+          }
+        ],
+        college: [
+          {
+            question: "What is the pH of a neutral solution?",
+            options: ["0", "7", "14", "1"],
+            correct: 1
+          }
+        ]
+      },
+      language: {
+        elementary: [
+          {
+            question: "What is a noun?",
+            options: ["Action word", "Person, place, or thing", "Describing word", "Connecting word"],
+            correct: 1
+          },
+          {
+            question: "Which word rhymes with 'cat'?",
+            options: ["Dog", "Hat", "Bird", "Fish"],
+            correct: 1
+          }
+        ],
+        middle: [
+          {
+            question: "What is the main idea of a paragraph?",
+            options: ["The first sentence", "What the paragraph is mostly about", "The last sentence", "The longest sentence"],
+            correct: 1
+          },
+          {
+            question: "Which is a complete sentence?",
+            options: ["Running quickly", "The dog barked loudly", "In the park", "Very happy today"],
+            correct: 1
+          }
+        ],
+        high: [
+          {
+            question: "What literary device is used in 'The wind whispered'?",
+            options: ["Metaphor", "Personification", "Alliteration", "Hyperbole"],
+            correct: 1
+          },
+          {
+            question: "What is a thesis statement?",
+            options: ["The conclusion", "The main argument", "A quote", "A question"],
+            correct: 1
+          }
+        ],
+        college: [
+          {
+            question: "What is the difference between denotation and connotation?",
+            options: ["Same meaning", "Literal vs. implied meaning", "Formal vs. informal", "Old vs. new meaning"],
+            correct: 1
+          }
+        ]
+      }
+    };
+
+    // Determine grade level category
+    const gradeLevel = ['K', '1st Grade', '2nd Grade', '3rd Grade', '4th Grade', '5th Grade'].includes(grade) ? 'elementary' :
+                     ['6th Grade', '7th Grade', '8th Grade'].includes(grade) ? 'middle' :
+                     ['9th Grade', '10th Grade', '11th Grade', '12th Grade'].includes(grade) ? 'high' : 'college';
+
+    // Map subject to category
+    const subjectCategory = subject.toLowerCase().includes('math') || subject.toLowerCase().includes('algebra') || 
+                           subject.toLowerCase().includes('calculus') || subject.toLowerCase().includes('geometry') ? 'mathematics' :
+                           subject.toLowerCase().includes('science') || subject.toLowerCase().includes('biology') || 
+                           subject.toLowerCase().includes('chemistry') || subject.toLowerCase().includes('physics') ? 'science' : 'language';
+
+    // Get questions or fallback to generic
+    const questions = questionBank[subjectCategory]?.[gradeLevel] || questionBank.language.middle;
+    
+    return questions.slice(0, 2);
+  };
 
   const handleGoalChange = (goal: string) => {
     updateData({ goal });
@@ -61,12 +213,12 @@ const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, o
     updateData({ role });
   };
 
-  const handleSubjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    updateData({ subject: e.target.value });
+  const handleSubjectChange = (subject: string) => {
+    updateData({ subject });
   };
 
-  const handleGradeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    updateData({ gradeLevel: e.target.value });
+  const handleGradeChange = (grade: string) => {
+    updateData({ gradeLevel: grade });
   };
 
   const handleAnswerSelect = (answerIndex: number) => {
@@ -88,15 +240,11 @@ const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, o
     return selectedAnswers[currentQuestion] !== undefined;
   };
 
-  const canShowResults = () => {
-    return data.goal && data.subject && data.gradeLevel && selectedAnswers.length >= 2;
-  };
-
   const getGoalDisplayName = (goal: string) => {
     const names: Record<string, string> = {
       'academics': 'Academic Support',
       'test-prep': 'Test Preparation',
-      'enrichment': 'Enrichment Learning'
+      'enrichment': 'Skill Building'
     };
     return names[goal] || goal;
   };
@@ -110,25 +258,25 @@ const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, o
         className="text-center mb-12"
       >
         <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          What's the learning goal today?
+          Let's personalize your learning experience
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          We'll personalize everything based on your learning goals and create a plan that works for you.
+          We'll create a customized learning plan based on your goals and current level.
         </p>
       </motion.div>
 
       <div className="bg-white rounded-2xl shadow-lg p-8 max-w-3xl mx-auto">
         {!showQuestions ? (
           <div className="space-y-8">
-            {/* Goal Selection */}
+            {/* Learning Goal Context */}
             <div>
               <label className="block text-lg font-semibold text-gray-700 mb-6 text-center">
-                Choose your learning goal
+                What brings you here today?
               </label>
               <GoalSelector selectedGoal={data.goal} onChange={handleGoalChange} />
             </div>
 
-            {/* Role Toggle */}
+            {/* Role Context */}
             {data.goal && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -139,55 +287,48 @@ const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, o
               </motion.div>
             )}
 
-            {/* Subject and Grade Selection */}
+            {/* Universal Subject Selection */}
             {data.goal && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="grid md:grid-cols-2 gap-6"
               >
-                <div>
-                  <label className="block text-lg font-semibold text-gray-700 mb-4">
-                    Select a subject
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={data.subject}
-                      onChange={handleSubjectChange}
-                      className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none appearance-none bg-white text-lg"
-                    >
-                      <option value="">Select a subject...</option>
-                      {availableSubjects.map((subject) => (
-                        <option key={subject} value={subject}>
-                          {subject}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" />
-                  </div>
-                </div>
+                <label className="block text-lg font-semibold text-gray-700 mb-4">
+                  What subject would you like help with? *
+                </label>
+                <SubjectAutocomplete 
+                  value={data.subject} 
+                  onChange={handleSubjectChange}
+                  placeholder="Start typing any subject..."
+                />
+              </motion.div>
+            )}
 
-                <div>
-                  <label className="block text-lg font-semibold text-gray-700 mb-4">
-                    Select grade level
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={data.gradeLevel}
-                      onChange={handleGradeChange}
-                      disabled={!data.subject}
-                      className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none appearance-none bg-white text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
+            {/* Universal Grade Selection */}
+            {data.subject && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <label className="block text-lg font-semibold text-gray-700 mb-4">
+                  What grade level?
+                </label>
+                <div className="grid grid-cols-3 md:grid-cols-7 gap-3">
+                  {allGrades.map((grade) => (
+                    <button
+                      key={grade.id}
+                      onClick={() => handleGradeChange(grade.id)}
+                      className={`p-3 rounded-lg border-2 font-medium transition-all ${
+                        data.gradeLevel === grade.id
+                          ? 'border-blue-600 bg-blue-50 text-blue-700'
+                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
                     >
-                      <option value="">Select grade level...</option>
-                      {availableGrades.map((grade) => (
-                        <option key={grade} value={grade}>
-                          {grade}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" />
-                  </div>
+                      {grade.label}
+                    </button>
+                  ))}
                 </div>
               </motion.div>
             )}
@@ -246,7 +387,7 @@ const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, o
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
-              {currentQuestion < questions.length - 1 ? 'Next Question' : 'See My Results'}
+              {currentQuestion < questions.length - 1 ? 'Next Question' : 'Generate My Learning Profile'}
             </motion.button>
           </motion.div>
         )}

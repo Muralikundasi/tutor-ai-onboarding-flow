@@ -17,13 +17,13 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
   
   const proficiencyScore = data.answers.length > 0 
     ? Math.round((correctAnswers / data.answers.length) * 100) 
-    : 68;
+    : 72;
 
   const getGoalDisplayName = (goal: string) => {
     const names: Record<string, string> = {
       'academics': 'Academic Support',
       'test-prep': 'Test Preparation', 
-      'enrichment': 'Enrichment Learning'
+      'enrichment': 'Skill Building'
     };
     return names[goal] || goal;
   };
@@ -32,27 +32,37 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
     return role === 'child' ? "your child's" : "your";
   };
 
-  // Get goal-specific insights
-  const getGoalInsights = () => {
-    const insights = {
-      'academics': {
-        strengths: ['Core concept understanding', 'Problem-solving approach', 'Learning foundation'],
-        growth: ['Advanced applications', 'Critical thinking', 'Study strategies']
-      },
-      'test-prep': {
-        strengths: ['Test-taking strategies', 'Time management', 'Content knowledge'],
-        growth: ['Advanced practice', 'Score optimization', 'Test confidence']
-      },
-      'enrichment': {
-        strengths: ['Creative thinking', 'Advanced concepts', 'Independent learning'],
-        growth: ['Project-based learning', 'Research skills', 'Leadership development']
-      }
-    };
+  // Universal insights generation based on subject and context
+  const getUniversalInsights = () => {
+    const subjectLower = data.subject.toLowerCase();
+    
+    let strengths = ['Problem-solving approach', 'Learning foundation', 'Conceptual understanding'];
+    let growth = ['Advanced applications', 'Practice consistency', 'Study strategies'];
 
-    return insights[data.goal as keyof typeof insights] || insights.academics;
+    // Customize based on subject category
+    if (subjectLower.includes('math') || subjectLower.includes('algebra') || subjectLower.includes('calculus')) {
+      strengths = ['Number sense', 'Logical reasoning', 'Mathematical concepts'];
+      growth = ['Advanced problem solving', 'Formula application', 'Word problems'];
+    } else if (subjectLower.includes('science') || subjectLower.includes('biology') || subjectLower.includes('chemistry')) {
+      strengths = ['Scientific thinking', 'Observation skills', 'Core concepts'];
+      growth = ['Experimental design', 'Data analysis', 'Advanced theories'];
+    } else if (subjectLower.includes('english') || subjectLower.includes('writing') || subjectLower.includes('literature')) {
+      strengths = ['Reading comprehension', 'Communication skills', 'Vocabulary'];
+      growth = ['Critical analysis', 'Essay structure', 'Advanced writing'];
+    }
+
+    // Adjust for goal context
+    if (data.goal === 'test-prep') {
+      growth = growth.map(item => `Test ${item.toLowerCase()}`);
+    } else if (data.goal === 'enrichment') {
+      strengths.push('Creative thinking');
+      growth = ['Advanced exploration', 'Independent research', 'Leadership skills'];
+    }
+
+    return { strengths, growth };
   };
 
-  const getAIFeatures = () => {
+  const getUniversalAIFeatures = () => {
     const features = {
       'academics': {
         title: 'AI Learning Support',
@@ -86,8 +96,8 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
     return features[data.goal as keyof typeof features] || features.academics;
   };
 
-  const { strengths, growth } = getGoalInsights();
-  const aiFeatures = getAIFeatures();
+  const { strengths, growth } = getUniversalInsights();
+  const aiFeatures = getUniversalAIFeatures();
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -98,15 +108,15 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
         className="text-center mb-12"
       >
         <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          Here's what we learned
+          {data.role === 'child' ? "Your child's" : "Your"} Learning Profile
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Based on {getRoleText(data.role)} {data.subject} assessment, we've created a personalized analysis for {getGoalDisplayName(data.goal).toLowerCase()}.
+          Based on {getRoleText(data.role)} {data.subject} assessment for {getGoalDisplayName(data.goal).toLowerCase()} goals.
         </p>
       </motion.div>
 
       <div className="grid md:grid-cols-2 gap-8 mb-12">
-        {/* Proficiency Gauge */}
+        {/* Universal Proficiency Gauge */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -157,7 +167,7 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
           </div>
         </motion.div>
 
-        {/* AI Preview Section */}
+        {/* Goal-Aware AI Preview Section */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -182,7 +192,7 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
         </motion.div>
       </div>
 
-      {/* Strengths and Growth Areas */}
+      {/* Universal Strengths and Growth Areas */}
       <div className="grid md:grid-cols-2 gap-8 mb-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -193,7 +203,7 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
           <div className="flex items-center mb-6">
             <CheckCircle className="w-6 h-6 text-green-500 mr-3" />
             <h3 className="text-xl font-bold text-gray-800">
-              {data.role === 'child' ? 'Your Child\'s Strengths' : 'Your Strengths'}
+              Current Strengths
             </h3>
           </div>
           
@@ -221,7 +231,9 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
         >
           <div className="flex items-center mb-6">
             <Lightbulb className="w-6 h-6 text-amber-500 mr-3" />
-            <h3 className="text-xl font-bold text-gray-800">Areas for Growth</h3>
+            <h3 className="text-xl font-bold text-gray-800">
+              {data.goal === 'test-prep' ? 'Focus Areas' : 'Growth Opportunities'}
+            </h3>
           </div>
           
           <div className="space-y-4">
@@ -241,7 +253,7 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
         </motion.div>
       </div>
 
-      {/* Call to Action */}
+      {/* Universal Call to Action */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -254,7 +266,7 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
           onClick={onNext}
           className="bg-gradient-to-r from-pink-500 to-orange-500 hover:shadow-lg text-white font-semibold text-lg px-12 py-4 rounded-xl transition-all"
         >
-          Build {data.role === 'child' ? 'My Child\'s' : 'My'} Personalized Plan
+          Ready to accelerate {data.role === 'child' ? 'your child\'s' : 'your'} progress?
         </motion.button>
         <p className="text-gray-600 mt-4">
           Get matched with expert tutors based on your assessment results
