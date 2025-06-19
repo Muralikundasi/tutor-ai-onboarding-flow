@@ -35,7 +35,7 @@ const OnboardingFlow = () => {
   };
 
   const pageTransition = {
-    type: "tween",
+    type: "tween" as const,
     ease: "anticipate",
     duration: 0.5
   };
