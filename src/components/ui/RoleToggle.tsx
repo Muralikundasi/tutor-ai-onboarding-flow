@@ -10,7 +10,7 @@ interface RoleToggleProps {
 const RoleToggle: React.FC<RoleToggleProps> = ({ selectedRole, onChange }) => {
   return (
     <div className="flex flex-col items-center space-y-3">
-      <label className="text-lg font-semibold text-gray-700">Who is this?</label>
+      <label className="text-lg font-semibold text-gray-700">I am?</label>
       <div className="relative bg-gray-200 rounded-full p-1 flex">
         <motion.div
           className="absolute top-1 bottom-1 bg-blue-600 rounded-full shadow-sm"
