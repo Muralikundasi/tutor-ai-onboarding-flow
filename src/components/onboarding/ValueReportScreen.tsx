@@ -266,7 +266,7 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
           onClick={onNext}
           className="bg-gradient-to-r from-pink-500 to-orange-500 hover:shadow-lg text-white font-semibold text-lg px-12 py-4 rounded-xl transition-all"
         >
-          Ready to accelerate {data.role === 'child' ? 'your child\'s' : 'your'} progress?
+          Ready to accelerate {data.role === 'Parent' ? 'your child\'s' : 'your'} progress?
         </motion.button>
         <p className="text-gray-600 mt-4">
           Get matched with expert tutors based on your assessment results
