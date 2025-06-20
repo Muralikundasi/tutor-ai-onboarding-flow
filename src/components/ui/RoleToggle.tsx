@@ -22,7 +22,7 @@ const RoleToggle: React.FC<RoleToggleProps> = ({ selectedRole, onChange }) => {
           transition={{ type: "spring", stiffness: 500, damping: 30 }}
         />
         <button
-          onClick={() => onChange('child')}
+          onClick={() => onChange('Student')}
           className={`relative z-10 px-6 py-2 text-sm font-medium rounded-full transition-colors ${
             selectedRole === 'Student' ? 'text-white' : 'text-gray-700'
           }`}
