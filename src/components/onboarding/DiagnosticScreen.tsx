@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
@@ -258,6 +257,13 @@ const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, o
     setSelectedAnswers(newAnswers);
   };
 
+  const handleSkipQuestion = () => {
+    const newAnswers = [...selectedAnswers];
+    newAnswers[currentQuestion] = -1; // -1 indicates skipped
+    setSelectedAnswers(newAnswers);
+    handleNextQuestion();
+  };
+
   const handleNextQuestion = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
@@ -407,19 +413,30 @@ const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, o
               </div>
             </div>
 
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              disabled={!canProceedToNext()}
-              onClick={handleNextQuestion}
-              className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all ${
-                canProceedToNext()
-                  ? 'bg-gradient-to-r from-pink-500 to-orange-500 hover:shadow-lg text-white'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              {currentQuestion < questions.length - 1 ? 'Next Question' : 'Generate My Learning Profile'}
-            </motion.button>
+            <div className="flex gap-4">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleSkipQuestion}
+                className="flex-1 py-4 px-6 rounded-xl font-semibold text-lg border-2 border-gray-300 text-gray-600 hover:border-gray-400 hover:bg-gray-50 transition-all"
+              >
+                Skip Question
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                disabled={!canProceedToNext()}
+                onClick={handleNextQuestion}
+                className={`flex-1 py-4 px-6 rounded-xl font-semibold text-lg transition-all ${
+                  canProceedToNext()
+                    ? 'bg-gradient-to-r from-pink-500 to-orange-500 hover:shadow-lg text-white'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {currentQuestion < questions.length - 1 ? 'Next Question' : 'Generate My Learning Profile'}
+              </motion.button>
+            </div>
           </motion.div>
         )}
       </div>
