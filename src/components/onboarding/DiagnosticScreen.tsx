@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
@@ -49,15 +50,18 @@ const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, o
       // First try to get questions from the database
       const dbQuestions = getQuestions(data.subject, data.gradeLevel);
       
+      let questionsToSet: any[] = [];
       if (dbQuestions.length > 0) {
-        setQuestions(dbQuestions);
+        questionsToSet = dbQuestions;
       } else {
         // Fallback to universal questions
-        const generatedQuestions = generateUniversalQuestions(data.subject, data.gradeLevel, data.goal, data.role);
-        setQuestions(generatedQuestions);
+        questionsToSet = generateUniversalQuestions(data.subject, data.gradeLevel, data.goal, data.role);
       }
       
-      if (questions.length > 0) {
+      setQuestions(questionsToSet);
+      
+      // Show questions if we have any
+      if (questionsToSet.length > 0) {
         setShowQuestions(true);
         setCurrentQuestion(0);
         setSelectedAnswers([]);
