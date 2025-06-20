@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
@@ -6,6 +5,7 @@ import { OnboardingData } from '../OnboardingFlow';
 import GoalSelector from '../ui/GoalSelector';
 import RoleToggle from '../ui/RoleToggle';
 import SubjectAutocomplete from '../ui/SubjectAutocomplete';
+import { getAvailableGrades, getQuestions } from '../../data/subjectDatabase';
 
 interface DiagnosticScreenProps {
   data: OnboardingData;
@@ -36,17 +36,44 @@ const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, o
     { id: 'College', label: 'College' }
   ];
 
+  // Get available grades for the selected subject
+  const getAvailableGradesForSubject = () => {
+    if (!data.subject) return allGrades;
+    
+    const availableGradeIds = getAvailableGrades(data.subject);
+    return allGrades.filter(grade => availableGradeIds.includes(grade.id));
+  };
+
   useEffect(() => {
     if (data.goal && data.subject && data.gradeLevel) {
-      const generatedQuestions = generateUniversalQuestions(data.subject, data.gradeLevel, data.goal, data.role);
-      if (generatedQuestions.length > 0) {
+      // First try to get questions from the database
+      const dbQuestions = getQuestions(data.subject, data.gradeLevel);
+      
+      if (dbQuestions.length > 0) {
+        setQuestions(dbQuestions);
+      } else {
+        // Fallback to universal questions
+        const generatedQuestions = generateUniversalQuestions(data.subject, data.gradeLevel, data.goal, data.role);
         setQuestions(generatedQuestions);
+      }
+      
+      if (questions.length > 0) {
         setShowQuestions(true);
         setCurrentQuestion(0);
         setSelectedAnswers([]);
       }
     }
   }, [data.goal, data.subject, data.gradeLevel, data.role]);
+
+  // Clear grade selection if it's not available for the new subject
+  useEffect(() => {
+    if (data.subject && data.gradeLevel) {
+      const availableGradeIds = getAvailableGrades(data.subject);
+      if (!availableGradeIds.includes(data.gradeLevel)) {
+        updateData({ gradeLevel: '' });
+      }
+    }
+  }, [data.subject]);
 
   const generateUniversalQuestions = (subject: string, grade: string, goal: string, role: string) => {
     // Universal question bank with intelligent selection
@@ -305,7 +332,7 @@ const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, o
               </motion.div>
             )}
 
-            {/* Universal Grade Selection */}
+            {/* Filtered Grade Selection */}
             {data.subject && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -316,7 +343,7 @@ const DiagnosticScreen: React.FC<DiagnosticScreenProps> = ({ data, updateData, o
                   What grade level?
                 </label>
                 <div className="grid grid-cols-3 md:grid-cols-7 gap-3">
-                  {allGrades.map((grade) => (
+                  {getAvailableGradesForSubject().map((grade) => (
                     <button
                       key={grade.id}
                       onClick={() => handleGradeChange(grade.id)}
