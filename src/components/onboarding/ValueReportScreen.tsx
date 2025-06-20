@@ -28,8 +28,8 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
     return names[goal] || goal;
   };
 
-  const getRoleText = (role: 'child' | 'Parent') => {
-    return role === 'child' ? "your child's" : "your";
+  const getRoleText = (role: 'Student' | 'Parent') => {
+    return role === 'Student' ? "Student's" : "your";
   };
 
   // Universal insights generation based on subject and context
@@ -108,7 +108,7 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
         className="text-center mb-12"
       >
         <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          {data.role === 'child' ? "Your child's" : "Your"} Learning Profile
+          {data.role === 'Student' ? "Student's" : "Your"} Learning Profile
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           Based on {getRoleText(data.role)} {data.subject} assessment for {getGoalDisplayName(data.goal).toLowerCase()} goals.
@@ -124,7 +124,7 @@ const ValueReportScreen: React.FC<ValueReportScreenProps> = ({ data, onNext }) =
           className="bg-white rounded-2xl shadow-lg p-8"
         >
           <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-            {data.role === 'child' ? 'Your Child\'s' : 'Your'} {data.subject} Proficiency
+            {data.role === 'Student' ? 'Your Student\'s' : 'Your'} {data.subject} Proficiency
           </h3>
           
           <div className="relative w-48 h-48 mx-auto mb-6">

@@ -3,8 +3,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 interface RoleToggleProps {
-  selectedRole: 'child' | 'Parent';
-  onChange: (role: 'child' | 'Parent') => void;
+  selectedRole: 'Student' | 'Parent';
+  onChange: (role: 'Student' | 'Parent') => void;
 }
 
 const RoleToggle: React.FC<RoleToggleProps> = ({ selectedRole, onChange }) => {
@@ -16,18 +16,18 @@ const RoleToggle: React.FC<RoleToggleProps> = ({ selectedRole, onChange }) => {
           className="absolute top-1 bottom-1 bg-blue-600 rounded-full shadow-sm"
           initial={false}
           animate={{
-            left: selectedRole === 'child' ? '4px' : '50%',
-            width: selectedRole === 'child' ? 'calc(50% - 4px)' : 'calc(50% - 4px)'
+            left: selectedRole === 'Student' ? '4px' : '50%',
+            width: selectedRole === 'Student' ? 'calc(50% - 4px)' : 'calc(50% - 4px)'
           }}
           transition={{ type: "spring", stiffness: 500, damping: 30 }}
         />
         <button
           onClick={() => onChange('child')}
           className={`relative z-10 px-6 py-2 text-sm font-medium rounded-full transition-colors ${
-            selectedRole === 'child' ? 'text-white' : 'text-gray-700'
+            selectedRole === 'Student' ? 'text-white' : 'text-gray-700'
           }`}
         >
-          My Child
+          Student
         </button>
         <button
           onClick={() => onChange('Parent')}

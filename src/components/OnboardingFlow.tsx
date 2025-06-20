@@ -7,7 +7,7 @@ import ConsultationScreen from './onboarding/ConsultationScreen';
 
 export type OnboardingData = {
   goal: string;
-  role: 'child' | 'Parent';
+  role: 'Student' | 'Parent';
   subject: string;
   gradeLevel: string;
   answers: number[];
@@ -20,7 +20,7 @@ const OnboardingFlow = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
     goal: '',
-    role: 'child',
+    role: 'Student',
     subject: '',
     gradeLevel: '',
     answers: [],
