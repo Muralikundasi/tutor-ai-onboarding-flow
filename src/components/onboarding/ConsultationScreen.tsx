@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, User, CheckCircle } from 'lucide-react';
@@ -7,9 +6,10 @@ import { OnboardingData } from '../OnboardingFlow';
 interface ConsultationScreenProps {
   data: OnboardingData;
   updateData: (data: Partial<OnboardingData>) => void;
+  onNext: () => void;
 }
 
-const ConsultationScreen: React.FC<ConsultationScreenProps> = ({ data, updateData }) => {
+const ConsultationScreen: React.FC<ConsultationScreenProps> = ({ data, updateData, onNext }) => {
   const [formData, setFormData] = useState({
     name: data.studentName || '',
     phone: data.phoneNumber || '',
@@ -54,7 +54,8 @@ const ConsultationScreen: React.FC<ConsultationScreenProps> = ({ data, updateDat
       ...data,
       ...formData
     });
-    alert('Thank you! We\'ll contact you within 24 hours to schedule your free consultation.');
+    // Move to success screen
+    onNext();
   };
 
   const isFormValid = formData.name.trim() && formData.phone.trim();
@@ -68,7 +69,7 @@ const ConsultationScreen: React.FC<ConsultationScreenProps> = ({ data, updateDat
         className="text-center mb-8"
       >
         <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          Ready to accelerate {data.role === 'Student' ? "Student's" : "your"} progress?
+          Ready to accelerate {data.role === 'Parent' ? "your child's" : "your"} progress?
         </h1>
         <p className="text-xl text-gray-600">
           Let's build a personalized {data.subject} learning plan for {getGoalDisplayName(data.goal).toLowerCase()}.
@@ -89,7 +90,7 @@ const ConsultationScreen: React.FC<ConsultationScreenProps> = ({ data, updateDat
           <div className="flex items-start">
             <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
             <span className="text-gray-700">
-              Review of {data.role === 'Student' ? "Student's" : "your"} {data.subject} diagnostic results in detail
+              Review of {data.role === 'Parent' ? "your child's" : "your"} {data.subject} diagnostic results in detail
             </span>
           </div>
           <div className="flex items-start">
@@ -126,7 +127,7 @@ const ConsultationScreen: React.FC<ConsultationScreenProps> = ({ data, updateDat
             <span className="font-medium text-gray-600">Goal:</span> {getGoalDisplayName(data.goal)}
           </div>
           <div>
-            <span className="font-medium text-gray-600">Learner:</span> {data.role === 'Student' ? 'Student' : 'Parent'}
+            <span className="font-medium text-gray-600">Learner:</span> {data.role === 'Parent' ? 'My Child' : 'Student'}
           </div>
           <div>
             <span className="font-medium text-gray-600">Subject:</span> {data.subject}
@@ -148,14 +149,14 @@ const ConsultationScreen: React.FC<ConsultationScreenProps> = ({ data, updateDat
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
             <User className="w-4 h-4 inline mr-2" />
-            {data.role === 'Student' ? "Student's Name" : "Your Name"} *
+            {data.role === 'Parent' ? "Student's Name" : "Your Name"} *
           </label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => handleInputChange('name', e.target.value)}
             className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
-            placeholder={data.role === 'Student' ? "Enter student's name" : "Enter your name"}
+            placeholder={data.role === 'Parent' ? "Enter student's name" : "Enter your name"}
             required
           />
         </div>
@@ -163,7 +164,7 @@ const ConsultationScreen: React.FC<ConsultationScreenProps> = ({ data, updateDat
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
             <Phone className="w-4 h-4 inline mr-2" />
-            {data.role === 'Student' ? "Parent/Guardian Phone Number" : "Your Phone Number"} *
+            {data.role === 'Parent' ? "Parent/Guardian Phone Number" : "Your Phone Number"} *
           </label>
           <input
             type="tel"
